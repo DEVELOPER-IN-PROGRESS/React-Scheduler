@@ -1,4 +1,4 @@
-import React ,{useState,useEffect} from 'react';
+import React ,{useState} from 'react';
 import Popup from '../popup/popup';
 
 import './calendar.css';
@@ -17,17 +17,59 @@ const Calendar = () => {
     const [monthNow ,setCurrentMonth]= useState(currentMonth) ;
     let [counter , setCounter] = useState(d.getMonth())
     let [yCounter , setYCounter] = useState(d.getFullYear())
+    let [daysGrid, setDaysGrid] = useState(daysArray);
+
+    const  checkYear = ( year) => {
+        if (year % 400 === 0)
+            return true;
+
+        if (year % 100 === 0)
+            return false;
+
+        if (year % 4 === 0)
+            return true;
+        return false;
+    }
 
     function incMonth(){
-        console.log(daysArray);
          ++counter ;
+
+         daysGrid = daysGrid.splice(35).includes(1) ? daysGrid.splice(35) :daysGrid.splice(28) ;
+         let checkpoint = daysGrid[daysGrid.length -1];
+         console.log({checkpoint});
+         ++checkpoint ;
+
+         let tempMonth = String(Object.keys(months[counter]))
+         let curr =  months[counter][tempMonth]
+         ++curr;
+         for(;checkpoint< curr;checkpoint++){
+          daysGrid.push(checkpoint);
+         }
+
+         console.log(daysGrid.length);
+
+        //debugger;
+
+         checkpoint = 1;
+
+         while(daysGrid.length<42){
+                daysGrid.push(checkpoint);
+                checkpoint ++;
+             //   debugger;
+         }
+
+
          if(counter>11){
              counter = 0;
              ++yCounter;
+
+            months[1].February = checkYear(yCounter) ? 29 :28 ;
              setYCounter(yCounter);
          }
          setCounter(counter);
          setCurrentMonth(String(Object.keys(months[counter])));
+         setDaysGrid(daysGrid);
+         daysArray = daysGrid ;
      }
 
      function decMonth(){
@@ -35,10 +77,23 @@ const Calendar = () => {
         if(counter<0){
             counter = 11;
             --yCounter;
+            months[1].February = checkYear(yCounter) ? 29 :28 ;
             setYCounter(yCounter);
         }
          setCounter(counter);
          setCurrentMonth(String(Object.keys(months[counter])));
+     }
+
+     const populateDays = () => {
+         const row = [] ;
+         for(let i =0 ; i<42 ;i++){
+            row.push(
+                <div className="day-col" key={i} onClick={openPopup}>
+                <p  className="day__number">{daysGrid[i]}</p>
+               </div>
+             );
+         }
+         return row;
      }
 
      function openPopup(){
@@ -75,17 +130,10 @@ const Calendar = () => {
                  })
              }
          </div>
-         <div className="dayGrid">
+         <div id="dayGrid" className="dayGrid">
              {
-                daysArray.map( (date,id) =>{
-                    return(
-                    <div className="day-col" key={id} onClick={openPopup}>
-                        <p  className="day__number">{date}</p>
-                     </div>);
-                 }
-                )
+                 populateDays()
              }
-
          </div>
 
     </div>
